@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cewki</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background-color: #f4f4f4;
+      margin: 0;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    form {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    input[type="text"], input[type="number"] {
+      padding: 10px;
+      font-size: 16px;
+      flex: 1 1 200px;
+    }
+
+    button {
+      padding: 10px 16px;
+      font-size: 16px;
+      background-color: #2d89ef;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    table {
+      width: 100%;
+      max-width: 800px;
+      margin: auto;
+      border-collapse: collapse;
+      background-color: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+
+    th {
+      background-color: #eee;
+    }
+
+    @media (max-width: 600px) {
+      form {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+
+      thead {
+        display: none;
+      }
+
+      tr {
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        padding: 10px;
+        background: #fff;
+      }
+
+      td {
+        text-align: right;
+        padding: 6px 10px;
+        position: relative;
+      }
+
+      td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        text-align: left;
+        font-weight: bold;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Papan Score Ceki Bray hati hati remontada</h1>
+
+  <form onsubmit="addPlayer(); return false;">
+    <input type="text" id="playerName" placeholder="Nama Pemain" required>
+    <button type="submit">Tambah</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Nama</th>
+        <th>Poin</th>
+        <th>Input</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody id="playerTable"></tbody>
+  </table>
+
+  <script>
+    let players = [];
+
+    function addPlayer() {
+      const name = document.getElementById('playerName').value.trim();
+      if (name === '') return;
+      players.push({ name: name, score: 0 });
+      document.getElementById('playerName').value = '';
+      renderTable();
+    }
+
+    function updateScore(index) {
+      const input = document.getElementById(`scoreInput-${index}`);
+      const value = parseInt(input.value);
+      if (isNaN(value)) return alert('Masukkan angka yang valid!');
+      players[index].score += value;
+      input.value = '';
+      renderTable();
+    }
+
+    function renderTable() {
+      const table = document.getElementById('playerTable');
+      table.innerHTML = '';
+      players.forEach((player, i) => {
+        table.innerHTML += `
+          <tr>
+            <td data-label="Nama">${player.name}</td>
+            <td data-label="Poin">${player.score}</td>
+            <td data-label="Input">
+              <input type="number" id="scoreInput-${i}" placeholder="+/- poin">
+            </td>
+            <td data-label="Aksi">
+              <button onclick="updateScore(${i})">Update</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+  </script>
+
+</body>
+</html>
