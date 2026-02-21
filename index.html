@@ -481,6 +481,29 @@
       return Math.trunc(n);
     }
 
+    // Input bebas (keyboard HP bisa huruf), tapi tetep diparse jadi angka
+    // inputmode itu hint untuk virtual keyboard. [web:3]
+    function parseScore(raw){
+      const s = String(raw ?? '').trim();
+      if(!s) return null;
+
+      // angka biasa: +50, -12, 30
+      if(/^[+-]?\d+$/.test(s)) return clampInt(Number(s));
+
+      // alias huruf: contoh A=10, B=20, C=30, D=40, E=50
+      // "BB" => 40, "ACE" => 10+30+50=90
+      const up = s.toUpperCase().replace(/\s+/g,'');
+      if(!/^[A-Z]+$/.test(up)) return null;
+
+      const map = { A:10, B:20, C:30, D:40, E:50 };
+      let total = 0;
+      for(const ch of up){
+        if(!(ch in map)) return null;
+        total += map[ch];
+      }
+      return clampInt(total);
+    }
+
     function getTopClass(rank){
       if(rank === 1) return 'top1';
       if(rank === 2) return 'top2';
@@ -687,7 +710,9 @@
             </div>
 
             <div class="actions">
-              <input class="scoreInput" ${disabled} inputmode="numeric" id="input-${p.id}" placeholder="+/- poin (misal: -50)" />
+              <input class="scoreInput" ${disabled}
+                type="text" inputmode="text" autocapitalize="characters"
+                id="input-${p.id}" placeholder="angka / alias (contoh: -50, A, BB)" />
               <div class="mini">
                 <button class="btn" ${disabled} onclick="updateScore('${p.id}')">Update</button>
                 <button class="btn secondary" ${disabled} onclick="removePlayer('${p.id}')">Hapus</button>
@@ -736,16 +761,15 @@
       if(!p) return;
 
       const elInput = document.getElementById(`input-${playerId}`);
-      const raw = elInput.value.trim();
-      const n = clampInt(Number(raw));
+      const raw = elInput.value;
+      const n = parseScore(raw);
 
-      if(raw === '' || n === null){
-        toast('Input invalid', 'Masukkan angka (boleh negatif).');
+      if(n === null){
+        toast('Input invalid', 'Masukkan angka (+/-) atau alias huruf (contoh: A, BB).');
         return;
       }
 
       const beforeSorted = sortPlayers(players);
-      const beforeScores = new Map(players.map(x=>[x.id,x.score]));
 
       p.score += n;
       elInput.value = '';
